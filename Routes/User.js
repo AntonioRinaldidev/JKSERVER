@@ -34,6 +34,8 @@ router.get('/', getUsers);
  *                 type: string
  *               email:
  *                 type: string
+ *               password:
+ *                 type: string
  *               role:
  *                 type: string
  *     responses:
@@ -67,6 +69,8 @@ router.post('/create', createUser);
  *               lastName:
  *                 type: string
  *               email:
+ *                 type: string
+ *               password:
  *                 type: string
  *               role:
  *                 type: string

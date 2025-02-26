@@ -3,12 +3,29 @@ const User = require('../Models/UserModel');
 // Creare un nuovo utente
 const createUser = async (req, res) => {
   try {
+    console.log("Received data:", req.body);
+
     const { firstName, lastName, email, password, role } = req.body;
-    const newUser = new User({ firstName, lastName, email, password, role });
+
+    if (!firstName || !lastName || !email || !password || !role) {
+      return res.status(400).json({ message: "Tutti i campi sono obbligatori" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "L'email è già registrata" });
+    }   
+
+      // Hash della password con un salt di 10
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ firstName, lastName, email, hashedPassword, role });
     await newUser.save();
+
     res.status(201).json({ message: 'Utente creato con successo', user: newUser });
   } catch (error) {
-    res.status(500).json({ message: 'Errore durante la creazione', error });
+    console.error("Errore nel server:", error);
+    res.status(500).json({ message: 'Errore durante la creazione', error: error.message });
   }
 };
 
@@ -25,8 +42,7 @@ const getUsers = async (req, res) => {
 // Modifica un utente esistente
 const modifyUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body; // Prende solo i campi forniti nella richiesta
+    const {id,updates} = req.body; // Prende solo i campi forniti nella richiesta
 
     // Controlla se ci sono dati da aggiornare
     if (Object.keys(updates).length === 0) {
@@ -49,4 +65,26 @@ const modifyUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser, getUsers, modifyUser };
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utente non trovato' });
+    }
+
+    // Confronta la password inserita con quella hashata nel database
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Credenziali non valide' });
+    }
+
+    res.status(200).json({ message: 'Login riuscito', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore durante il login', error });
+  }
+};
+
+module.exports = { createUser, getUsers, modifyUser,loginUser };
