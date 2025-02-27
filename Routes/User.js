@@ -1,5 +1,6 @@
 const express = require('express');
-const { createUser, getUsers, modifyUser } = require('../Controllers/UserController');
+const { createUser, getUser, modifyUser, loginUser, logoutUser } = require('../Controllers/UserController');
+const { verifyToken } = require('../Verification/tokenVerification');
 
 const router = express.Router();
 
@@ -7,13 +8,13 @@ const router = express.Router();
  * @swagger
  * /api/users:
  *   get:
- *     summary: Get all users
+ *     summary: Get one user
  *     description: Retrieve a list of all users.
  *     responses:
  *       200:
  *         description: Successfully retrieved list of users
  */
-router.get('/', getUsers);
+router.get('/', getUser);
 
 /**
  * @swagger
@@ -80,6 +81,45 @@ router.post('/create', createUser);
  *       404:
  *         description: User not found
  */
-router.put('/modify/:id', modifyUser);
+router.put('/modify/:id', verifyToken, modifyUser);
+
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Authenticate a user
+ *     description: Log in a user and return an access token.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/login', loginUser);
+
+/**
+ * @swagger
+ * /api/users/logout:
+ *   post:
+ *     summary: Log out a user
+ *     description: Remove the refresh token and log out the user.
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       400:
+ *         description: No refresh token found
+ */
+router.post('/logout', logoutUser);
 
 module.exports = router;

@@ -4,6 +4,9 @@ const {
 	generateAccessToken,
 	generateRefreshToken,
 } = require("../Verification/tokenVerification");
+const bcrypt = require("bcrypt");
+
+
 
 // Creare un nuovo utente
 const createUser = async (req, res) => {
@@ -13,94 +16,166 @@ const createUser = async (req, res) => {
 		const { firstName, lastName, email, password, role } = req.body;
 
 		if (!firstName || !lastName || !email || !password || !role) {
-			return res
-				.status(400)
-				.json({ message: "Tutti i campi sono obbligatori" });
+			return res.status(400).json({
+				isSuccess: false,
+				message: "Tutti i campi sono obbligatori",
+				data: null,
+			});
 		}
 
 		const existingUser = await User.findOne({ email });
 		if (existingUser) {
-			return res.status(400).json({ message: "L'email è già registrata" });
+			return res.status(400).json({
+				isSuccess: false,
+				message: "L'email è già registrata",
+				data: null,
+			});
 		}
 
-		// Hash della password con un salt di 10
+		
 		const hashedPassword = await bcrypt.hash(password, 10);
+
+		
 
 		const newUser = new User({
 			firstName,
 			lastName,
 			email,
-			hashedPassword,
+			password: hashedPassword,
 			role,
 		});
 		await newUser.save();
 
-		res
-			.status(201)
-			.json({ message: "Utente creato con successo", user: newUser });
+		const api_response = {
+			isSuccess: true,
+			message: "Utente creato con successo",
+			data: newUser,
+		};
+
+		res.status(201).json(api_response);
 	} catch (error) {
 		console.error("Errore nel server:", error);
-		res
-			.status(500)
-			.json({ message: "Errore durante la creazione", error: error.message });
+		res.status(500).json({
+			isSuccess: false,
+			message: "Errore durante la creazione",
+			data: error.message,
+		});
 	}
 };
 
-// Ottenere tutti gli utenti
-const getUsers = async (req, res) => {
+// Ottenere un utente
+const getUser = async (req, res) => {
 	try {
-		const users = await User.find();
-		res.json(users);
+		const email = req.user.email;
+		const user = await User.findOne({ email });
+
+		if (!user) {
+			return res.status(404).json({
+				isSuccess: false,
+				message: "Utente non trovato",
+				data: null,
+			});
+		}
+
+		const api_response = {
+			isSuccess: true,
+			message: "Utente trovato",
+			data: user,
+		};
+
+		res.status(200).json(api_response);
 	} catch (error) {
-		res.status(500).json({ message: "Errore nel recupero utenti", error });
+		res.status(500).json({
+			isSuccess: false,
+			message: "Errore nel recupero dell'utente",
+			data: error.message,
+		});
 	}
 };
 
 // Modifica un utente esistente
 const modifyUser = async (req, res) => {
 	try {
-		const { id, updates } = req.body; // Prende solo i campi forniti nella richiesta
+		const { id, updates } = req.body;
 
-		// Controlla se ci sono dati da aggiornare
 		if (Object.keys(updates).length === 0) {
-			return res
-				.status(400)
-				.json({ message: "Nessun dato fornito per l'aggiornamento" });
+			return res.status(400).json({
+				isSuccess: false,
+				message: "Nessun dato fornito per l'aggiornamento",
+				data: null,
+			});
 		}
 
 		const updatedUser = await User.findByIdAndUpdate(
 			id,
-			{ $set: updates }, // Solo i campi forniti vengono aggiornati
-			{ new: true, runValidators: true } // Restituisce il nuovo documento aggiornato
+			{ $set: updates },
+			{ new: true, runValidators: true }
 		);
 
 		if (!updatedUser) {
-			return res.status(404).json({ message: "Utente non trovato" });
+			return res.status(404).json({
+				isSuccess: false,
+				message: "Utente non trovato",
+				data: null,
+			});
 		}
 
-		res.json({ message: "Utente aggiornato con successo", user: updatedUser });
+		const api_response = {
+			isSuccess: true,
+			message: "Utente aggiornato con successo",
+			data: updatedUser,
+		};
+
+		res.status(200).json(api_response);
 	} catch (error) {
-		res.status(500).json({ message: "Errore durante la modifica", error });
+		res.status(500).json({
+			isSuccess: false,
+			message: "Errore durante la modifica",
+			data: error.message,
+		});
 	}
 };
 
+// Login utente
 const loginUser = async (req, res) => {
 	try {
 		const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                isSuccess: false,
+                message: "Email e password sono obbligatori",
+                data: null,
+            });
+        }
+
 		const user = await User.findOne({ email });
 
 		if (!user) {
-			return res.status(404).json({ message: "Utente non trovato" });
+			return res.status(404).json({
+				isSuccess: false,
+				message: "Utente non trovato",
+				data: null,
+			});
 		}
 
-		// Confronta la password inserita con quella hashata nel database
+		
+
+		// Verifica password
 		const isMatch = await bcrypt.compare(password, user.password);
 
 		if (!isMatch) {
-			return res.status(401).json({ message: "Credenziali non valide" });
+			console.error("Password mismatch");
+			return res.status(401).json({
+				isSuccess: false,
+				message: "Credenziali non valide",
+				data: null,
+			});
 		}
 
-		// Generazione dell'access token e refresh token
+		
+
+		// Genera token di accesso e refresh
 		const accessToken = generateAccessToken({
 			userId: user._id,
 			email: user.email,
@@ -110,7 +185,7 @@ const loginUser = async (req, res) => {
 			email: user.email,
 		});
 
-		// Salva il refresh token nel database
+		// Salva il refresh token
 		const newToken = new Token({
 			userId: user._id,
 			refreshToken,
@@ -124,24 +199,55 @@ const loginUser = async (req, res) => {
 			sameSite: "Strict",
 		});
 
-		res.status(200).json({ message: "Login riuscito", accessToken });
+		const api_response = {
+			isSuccess: true,
+			message: "Login riuscito",
+			data: { user,accessToken, refreshToken },
+		};
+
+		res.status(200).json(api_response);
 	} catch (error) {
-		res.status(500).json({ message: "Errore durante il login", error });
+		console.error("Errore durante il login:", error);
+		res.status(500).json({
+			isSuccess: false,
+			message: "Errore durante il login",
+			data: error.message,
+		});
 	}
 };
-// Logout - rimuovere il refresh token
+
+// Logout utente - rimuovere il refresh token
 const logoutUser = (req, res) => {
 	const refreshToken = req.cookies.refreshToken;
 
 	if (!refreshToken) {
-		return res.status(400).json({ message: "Nessun refresh token trovato" });
+		return res.status(400).json({
+			isSuccess: false,
+			message: "Nessun refresh token trovato",
+			data: null,
+		});
 	}
 
-	// Rimuovi il refresh token da memoria
-	refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+	// Rimuove il refresh token dal database
+	Token.findOneAndDelete({ refreshToken })
+		.then(() => {
+			res.clearCookie("refreshToken");
 
-	// Cancella il cookie contenente il refresh token
-	res.clearCookie("refreshToken");
-	res.json({ message: "Logout riuscito" });
+			const api_response = {
+				isSuccess: true,
+				message: "Logout riuscito",
+				data: null,
+			};
+
+			res.status(200).json(api_response);
+		})
+		.catch((error) => {
+			res.status(500).json({
+				isSuccess: false,
+				message: "Errore durante il logout",
+				data: error.message,
+			});
+		});
 };
-module.exports = { createUser, getUsers, modifyUser, loginUser, logoutUser };
+
+module.exports = { createUser, getUser, modifyUser, loginUser, logoutUser };
