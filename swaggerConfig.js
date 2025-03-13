@@ -11,7 +11,7 @@ const options = {
 		},
 		servers: [
 			{
-				url: "http://157.90.158.44:4000/", // Update with your actual base URL
+				url: "https://jkryson.com", // dominio pubblico reale
 			},
 		],
 	},

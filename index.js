@@ -35,19 +35,23 @@ mongoose
 
 const app = express();
 setupSwagger(app);
+
 app.use(express.json());
 app.use(cookieparsers());
+
+// ✅ CORS aggiornato per produzione:
+app.use(
+	cors({
+		origin: "https://jkryson.com",
+		credentials: true,
+	})
+);
+
+// ✅ Handle preflight requests (se vuoi mantenerlo)
 app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // ✅ Allow frontend URL
 	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 	res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-	res.header("Access-Control-Allow-Credentials", "true"); // ✅ Allow cookies & headers
-
-	// ✅ Handle preflight requests
-	if (req.method === "OPTIONS") {
-		return res.status(200).end();
-	}
-
+	if (req.method === "OPTIONS") return res.status(200).end();
 	next();
 });
 
@@ -55,13 +59,12 @@ app.use((req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/auth", tokenRoutes);
 
-
-
-app.listen(process.env.PORT_NUMBER, () =>
+// ✅ Ascolta su tutte le interfacce, non solo localhost
+app.listen(process.env.PORT_NUMBER, "0.0.0.0", () =>
 	consoleLogCustom(
 		`[Server Info] ~`,
 		"orange",
-		`http//localhost:${process.env.PORT_NUMBER}`,
+		`http://localhost:${process.env.PORT_NUMBER}`,
 		"purple"
 	)
 );
