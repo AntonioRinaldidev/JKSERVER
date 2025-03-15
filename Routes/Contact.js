@@ -24,6 +24,9 @@ require('dotenv').config();
  *               email:
  *                 type: string
  *                 example: mario.rossi@example.com
+ *               subject:
+ *                 type: string
+ *                 example: Richiesta di preventivo
  *               message:
  *                 type: string
  *                 example: Vorrei un preventivo per il mio progetto.
@@ -57,13 +60,13 @@ require('dotenv').config();
  */
 
 router.post('/send', async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, subject, message } = req.body;
 
   // ✅ Validazione base dei dati
-  if (!name || !email || !message) {
+  if (!name || !email || !message || !subject) {
     return res.status(400).json({
       success: false,
-      message: 'Tutti i campi (nome, email, messaggio) sono obbligatori.',
+      message: 'Tutti i campi (nome, email, oggetto, messaggio) sono obbligatori.',
     });
   }
 
@@ -77,66 +80,67 @@ router.post('/send', async (req, res) => {
       },
     });
 
-const mailOptions = {
-  from: `"ARDEV Website" <${process.env.CONTACT_EMAIL_FROM}>`,
-  to: process.env.CONTACT_EMAIL_TO,
-  subject: '📬 Nuova richiesta di contatto - ARDEV',
-  html: `
-  <div style="font-family: 'Segoe UI', Roboto, sans-serif; max-width: 90vw; margin: 0 auto; background: #f4f4f8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;">
-     <!-- LOGO -->
-    <div style="background: #ffffff; text-align: center; padding: 25px 0 10px;">
-      <img src="https://jkryson.com/public/logo.png" alt="ARDEV Logo" style="max-width: 204px; height: auto;" />
-    </div>
+    const mailOptions = {
+      from: `"ARDEV Website" <${process.env.CONTACT_EMAIL_FROM}>`,
+      to: process.env.CONTACT_EMAIL_TO,
+      subject: '📬 Nuova richiesta di contatto - ARDEV',
+      html: `
+        <div style="font-family: 'Segoe UI', Roboto, sans-serif; max-width: 90vw; margin: 0 auto; background: #f4f4f8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;">
+          <!-- LOGO -->
+          <div style="background:rgb(0, 0, 0); text-align: center; padding: 25px 0 10px;">
+            <img src="https://jkryson.com/public/logo2.png" alt="ARDEV Logo" style="max-width: 102px; height: auto;" />
+          </div>
 
-    <!-- HEADER -->
-    <div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 30px 25px; text-align: center;">
-      <h2 style="margin: 0; color: #fbbf24; font-size: 26px;">🚀 New Contact Request</h2>
-      <p style="margin: 10px 0 0; color: #e5e7eb; font-size: 16px;">Received from <strong style="color: #e5e7eb;">ARDEV Website</strong></p>
-    </div>
+          <!-- HEADER -->
+          <div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 30px 25px; text-align: center;">
+            <h2 style="margin: 0; color: #fbbf24; font-size: 26px;">🚀 New Contact Request</h2>
+            <p style="margin: 10px 0 0; color: #e5e7eb; font-size: 16px;">Received from <strong style="color: #e5e7eb;">ARDEV Website</strong></p>
+          </div>
 
-    <!-- MAIN CONTENT -->
-    <div style="padding: 35px 30px; background-color: #ffffff;">
-      <h3 style="color: #111827; font-size: 20px; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">📩 Contact Details</h3>
+          <!-- MAIN CONTENT -->
+          <div style="padding: 35px 30px; background-color: #ffffff;">
+            <h3 style="color: #111827; font-size: 20px; margin-bottom: 25px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">📩 Contact Details</h3>
 
-      <div style="display: flex; flex-direction: column; gap: 25px;">
-        <!-- Name -->
-        <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
-          <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">👤 Name</p>
-          <p style="margin-top: 6px; font-size: 16px; color: #111827;">${name}</p>
+            <div style="display: flex; flex-direction: column; gap: 25px;">
+              <!-- Name -->
+              <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
+                <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">👤 Name</p>
+                <p style="margin-top: 6px; font-size: 16px; color: #111827;">${name}</p>
+              </div>
+
+              <!-- Email -->
+              <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
+                <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">📧 Email</p>
+                <p style="margin-top: 6px; font-size: 16px;">
+                  <a href="mailto:${email}" style="color: #3b82f6; text-decoration: none;">${email}</a>
+                </p>
+              </div>
+
+              <!-- Subject -->
+              <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
+                <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">📌 Subject</p>
+                <p style="margin-top: 6px; font-size: 16px; color: #111827;">${subject}</p>
+              </div>
+
+              <!-- Message -->
+              <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
+                <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">💬 Message</p>
+                <p style="margin-top: 10px; font-size: 16px; color: #111827; line-height: 1.6;">
+                  ${message.replace(/\n/g, '<br />')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="background-color: #0f172a; padding: 20px; text-align: center; color: #9ca3af; font-size: 13px;">
+            <p style="margin: 0;">&copy; ${new Date().getFullYear()} <strong style="color: #fbbf24;">ARDEV</strong> | All rights reserved</p>
+            <p style="margin: 5px 0 0;"><a href="https://jkryson.com" style="color: #fbbf24; text-decoration: none;">jkryson.com</a></p>
+          </div>
         </div>
-
-        <!-- Email -->
-        <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
-          <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">📧 Email</p>
-          <p style="margin-top: 6px; font-size: 16px;">
-            <a href="mailto:${email}" style="color: #3b82f6; text-decoration: none;">${email}</a>
-          </p>
-        </div>
-
-        <!-- Message -->
-        <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
-          <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">💬 Message</p>
-          <p style="margin-top: 10px; font-size: 16px; color: #111827; line-height: 1.6;">
-            ${message.replace(/\n/g, '<br />')}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- FOOTER -->
-    <div style="background-color: #0f172a; padding: 20px; text-align: center; color: #9ca3af; font-size: 13px;">
-      <p style="margin: 0;">&copy; ${new Date().getFullYear()} <strong style="color: #fbbf24;">ARDEV</strong> | All rights reserved</p>
-      <p style="margin: 5px 0 0;"><a href="https://jkryson.com" style="color: #fbbf24; text-decoration: none;">jkryson.com</a></p>
-    </div>
-  </div>
-  `,
-  replyTo: email,
-};
-
-
-
-
-
+      `,
+      replyTo: email,
+    };
 
     // ✅ Invio email
     await transporter.sendMail(mailOptions);
