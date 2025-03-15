@@ -41,8 +41,11 @@ app.use(express.json());
 app.use(cookieparsers());
 
 // ✅ CORS aggiornato per produzione:
-const allowedOrigins = ["http://localhost:3000", "https://jkryson.com"];
-
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://jkryson.com",
+  "https://www.jkryson.com"
+];
 app.use(
 	cors({
 		origin: function (origin, callback) {
