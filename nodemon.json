@@ -1,0 +1,6 @@
+{
+  "watch": ["*.js", "Routes/", "utilities/"],
+  "ext": "js,json",
+  "ignore": ["node_modules/**"],
+  "exec": "node index.js"
+}

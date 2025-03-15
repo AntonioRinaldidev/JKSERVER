@@ -11,7 +11,7 @@ const options = {
 		},
 		servers: [
 			{
-				url: "https://jkryson.com", // dominio pubblico reale
+				url: "http://localhost:4000/", // dominio pubblico reale
 			},
 		],
 	},

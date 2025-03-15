@@ -8,6 +8,7 @@ const { consoleLogCustom } = require("./utilities/utilities");
 
 const userRoutes = require("./Routes/User");
 const tokenRoutes = require("./Routes/Token");
+const fileDownloadRoutes = require("./Routes/FileDownload");
 
 //**DB CONNECTION */
 mongoose
@@ -40,12 +41,22 @@ app.use(express.json());
 app.use(cookieparsers());
 
 // ✅ CORS aggiornato per produzione:
+const allowedOrigins = ["http://localhost:3000", "https://jkryson.com"];
+
 app.use(
 	cors({
-		origin: "https://jkryson.com",
+		origin: function (origin, callback) {
+			// Allow requests with no origin (like mobile apps or curl)
+			if (!origin) return callback(null, true);
+			if (allowedOrigins.includes(origin)) {
+				return callback(null, true);
+			} else {
+				return callback(new Error("Not allowed by CORS"));
+			}
+		},
 		credentials: true,
 	})
-);
+); 
 
 // ✅ Handle preflight requests (se vuoi mantenerlo)
 app.use((req, res, next) => {
@@ -58,13 +69,14 @@ app.use((req, res, next) => {
 //**ROUTE SECTION */
 app.use("/api/users", userRoutes);
 app.use("/api/auth", tokenRoutes);
+app.use("/api/download", fileDownloadRoutes);
 
 // ✅ Ascolta su tutte le interfacce, non solo localhost
-app.listen(process.env.PORT_NUMBER, "0.0.0.0", () =>
+app.listen(process.env.PORT, "0.0.0.0", () =>
 	consoleLogCustom(
 		`[Server Info] ~`,
 		"orange",
-		`http://localhost:${process.env.PORT_NUMBER}`,
+		`http://localhost:${process.env.PORT}`,
 		"purple"
 	)
 );
