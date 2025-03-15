@@ -76,7 +76,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", tokenRoutes);
 app.use("/api/download", fileDownloadRoutes);
 app.use("/api/contact", contact);
-app.use('/public', express.static('public'));
+app.use('/public', express.static('Public'));
 
 // ✅ Ascolta su tutte le interfacce, non solo localhost
 app.listen(process.env.PORT, "0.0.0.0", () =>
