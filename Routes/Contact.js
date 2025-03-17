@@ -90,8 +90,8 @@ router.post("/send", async (req, res) => {
 			html: `
         <div style="font-family: 'Segoe UI', Roboto, sans-serif; max-width: 90vw; margin: 0 auto; background: #f4f4f8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;">
           <!-- LOGO -->
-          <div style="background:rgb(0, 0, 0); text-align: center; padding: 25px 0 10px;">
-            <img src="https://jkryson.com/public/logo2.png" alt="ARDEV Logo" style="max-width: 102px; height: auto;" />
+          <div style="background:#5; text-align: center; padding: 25px 0 10px;">
+            <img src="https://jkryson.com/public/ardev-2.png" alt="ARDEV Logo" style="max-width: 102px; height: auto;" />
           </div>
 
           <!-- HEADER -->
