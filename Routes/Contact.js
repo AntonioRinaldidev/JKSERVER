@@ -1,7 +1,7 @@
-const express = require('express');
-const nodemailer = require('nodemailer');
+const express = require("express");
+const nodemailer = require("nodemailer");
 const router = express.Router();
-require('dotenv').config();
+require("dotenv").config();
 
 /**
  * @swagger
@@ -59,32 +59,35 @@ require('dotenv').config();
  *                   example: Errore durante l’invio dell’email.
  */
 
-router.post('/send', async (req, res) => {
-  const { name, email, subject, message } = req.body;
+router.post("/send", async (req, res) => {
+	const { name, email, subject, message } = req.body;
 
-  // ✅ Validazione base dei dati
-  if (!name || !email || !message || !subject) {
-    return res.status(400).json({
-      success: false,
-      message: 'Tutti i campi (nome, email, oggetto, messaggio) sono obbligatori.',
-    });
-  }
+	// ✅ Validazione base dei dati
+	if (!name || !email || !message || !subject) {
+		return res.status(400).json({
+			success: false,
+			message:
+				"Tutti i campi (nome, email, oggetto, messaggio) sono obbligatori.",
+		});
+	}
 
-  try {
-    // ✅ Configurazione trasportatore nodemailer
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.CONTACT_EMAIL_FROM,
-        pass: process.env.CONTACT_EMAIL_PASSWORD, // Usare una "App password" di Gmail con 2FA attivo
-      },
-    });
+	try {
+		// ✅ Configurazione trasportatore nodemailer
+		const transporter = nodemailer.createTransport({
+			host: "smtp.gmail.com",
+			port: 587, // ✅ porta aperta su Hetzner
+			secure: false, // ❌ NO secure su 587
+			auth: {
+				user: process.env.CONTACT_EMAIL_FROM,
+				pass: process.env.CONTACT_EMAIL_PASSWORD,
+			},
+		});
 
-    const mailOptions = {
-      from: `"ARDEV Website" <${process.env.CONTACT_EMAIL_FROM}>`,
-      to: process.env.CONTACT_EMAIL_TO,
-      subject: '📬 Nuova richiesta di contatto - ARDEV',
-      html: `
+		const mailOptions = {
+			from: `"ARDEV Website" <${process.env.CONTACT_EMAIL_FROM}>`,
+			to: process.env.CONTACT_EMAIL_TO,
+			subject: "📬 Nuova richiesta di contatto - ARDEV",
+			html: `
         <div style="font-family: 'Segoe UI', Roboto, sans-serif; max-width: 90vw; margin: 0 auto; background: #f4f4f8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;">
           <!-- LOGO -->
           <div style="background:rgb(0, 0, 0); text-align: center; padding: 25px 0 10px;">
@@ -126,7 +129,7 @@ router.post('/send', async (req, res) => {
               <div style="background: #f9fafb; padding: 20px 20px 15px; border-left: 4px solid #3b82f6; border-radius: 10px;">
                 <p style="margin: 0; font-weight: 600; color: #374151; font-size: 15px;">💬 Message</p>
                 <p style="margin-top: 10px; font-size: 16px; color: #111827; line-height: 1.6;">
-                  ${message.replace(/\n/g, '<br />')}
+                  ${message.replace(/\n/g, "<br />")}
                 </p>
               </div>
             </div>
@@ -139,24 +142,24 @@ router.post('/send', async (req, res) => {
           </div>
         </div>
       `,
-      replyTo: email,
-    };
+			replyTo: email,
+		};
 
-    // ✅ Invio email
-    await transporter.sendMail(mailOptions);
+		// ✅ Invio email
+		await transporter.sendMail(mailOptions);
 
-    // ✅ Risposta positiva
-    res.status(200).json({
-      success: true,
-      message: 'Email inviata con successo.',
-    });
-  } catch (error) {
-    console.error('❌ Errore durante l’invio email:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Errore durante l’invio dell’email.',
-    });
-  }
+		// ✅ Risposta positiva
+		res.status(200).json({
+			success: true,
+			message: "Email inviata con successo.",
+		});
+	} catch (error) {
+		console.error("❌ Errore durante l’invio email:", error.message);
+		res.status(500).json({
+			success: false,
+			message: "Errore durante l’invio dell’email.",
+		});
+	}
 });
 
 module.exports = router;
