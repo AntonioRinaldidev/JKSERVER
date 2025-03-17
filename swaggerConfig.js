@@ -15,7 +15,7 @@ const options = {
 				description: "Local development server",
 			},
 			{
-				url: "https://jkryson.com/api",
+				url: "https://jkryson.com",
 				description: "Production server",
 			},
 		],
