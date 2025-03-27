@@ -10,6 +10,7 @@ const userRoutes = require("./Routes/User");
 const tokenRoutes = require("./Routes/Token");
 const fileDownloadRoutes = require("./Routes/FileDownload");
 const contact = require("./Routes/Contact");
+const pdf = require("./Routes/CvGenerator");
 
 //**DB CONNECTION */
 mongoose
@@ -77,6 +78,7 @@ app.use("/api/auth", tokenRoutes);
 app.use("/api/download", fileDownloadRoutes);
 app.use("/api/contact", contact);
 app.use("/public", express.static("Public"));
+app.use("/api/cv", pdf);
 
 // ✅ Ascolta su tutte le interfacce, non solo localhost
 app.listen(process.env.PORT, "0.0.0.0", () =>
