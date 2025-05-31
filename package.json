@@ -2,15 +2,19 @@
   "name": "jkserver",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
+ "scripts": {
+  "dev:pdf": "nodemon --config nodemon.babel.json",
+  "dev:server": "nodemon",
+  "dev": "concurrently \"npm run dev:pdf\" \"npm run dev:server\"",
+  "build:pdf": "npx babel components/CvDocument.jsx --out-file dist/CvDocument.mjs"
+},
+
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "@krysondto/shared-dtos": "^1.0.3",
+    "@react-pdf/renderer": "^4.3.0",
     "bcrypt": "^5.1.1",
     "chalk": "^5.4.1",
     "cookie-parser": "^1.4.7",
@@ -21,9 +25,18 @@
     "mongoose": "^8.10.2",
     "morgan": "^1.10.0",
     "nodemailer": "^6.10.0",
-    "nodemon": "^3.1.9",
     "path": "^0.12.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.27.0",
+    "@babel/core": "^7.26.10",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/register": "^7.25.9",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9"
   }
 }

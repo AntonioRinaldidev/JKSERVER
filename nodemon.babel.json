@@ -1,0 +1,7 @@
+{
+    "watch": ["components/CvDocument.jsx"],
+    "ext": "jsx",
+    "ignore": ["node_modules/**"],
+    "exec": "npx babel components/CvDocument.jsx --out-file dist/CvDocument.mjs"
+  }
+  

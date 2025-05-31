@@ -10,6 +10,7 @@ const userRoutes = require("./Routes/User");
 const tokenRoutes = require("./Routes/Token");
 const fileDownloadRoutes = require("./Routes/FileDownload");
 const contact = require("./Routes/Contact");
+const pdf = require("./Routes/CvGenerator");
 
 //**DB CONNECTION */
 mongoose
@@ -43,10 +44,10 @@ app.use(cookieparsers());
 
 // ✅ CORS aggiornato per produzione:
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://jkryson.com",
-  "https://www.jkryson.com",
-  "http://localhost:4000",
+	"http://localhost:3000",
+	"https://jkryson.com",
+	"https://www.jkryson.com",
+	"http://localhost:4000",
 ];
 app.use(
 	cors({
@@ -61,7 +62,7 @@ app.use(
 		},
 		credentials: true,
 	})
-); 
+);
 
 // ✅ Handle preflight requests (se vuoi mantenerlo)
 app.use((req, res, next) => {
@@ -76,7 +77,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", tokenRoutes);
 app.use("/api/download", fileDownloadRoutes);
 app.use("/api/contact", contact);
-app.use('/public', express.static('Public'));
+app.use("/public", express.static("Public"));
+app.use("/api/cv", pdf);
 
 // ✅ Ascolta su tutte le interfacce, non solo localhost
 app.listen(process.env.PORT, "0.0.0.0", () =>
